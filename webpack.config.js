@@ -1,13 +1,15 @@
-var htmlWebpackPlugin=require('html-webpack-plugin');
+const htmlWebpackPlugin=require('html-webpack-plugin');
+const vueLoaderPlugin=require('vue-loader/lib/plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');//生成文件之前清空
 module.exports={
 	entry:{
 		'app':'./src/app.js',
-		'main':'./src/script/main.js',
+		'main':'./src/main.js',
 		'a':'./src/script/a.js',
 	    'b':'./src/script/b.js',
 	    'c':'./src/script/c.js'},
 	output:{
-		path:require("path").resolve(__dirname,"dist"),
+		 path:__dirname+'/dist',
 		filename:'js/[name]-bundle.js'
 	},
 	module:{
@@ -25,12 +27,11 @@ module.exports={
 	      }
 	    },
 	    {
-	      test: /\.js$/,
+	      test: /\.(js|.jsx)$/,
 	      use: {
 	        loader: 'babel-loader'
 	      },
-	      exclude: require("path").resolve(__dirname,"node_modules"),
-	      include: require("path").resolve(__dirname,"src") 
+	      exclude: require("path").resolve(__dirname,"node_modules")
 	    },
 	    {
 	    	test:/\.css$/,
@@ -75,7 +76,7 @@ module.exports={
 	    	}]
 	    },
 	     {
-	    	test:/\.sass$/,
+	    	test:/\.(sass|scss)$/,
 	    	use:[
 	    	{
 	    	loader:'style-loader'	    	
@@ -99,14 +100,24 @@ module.exports={
 	    {
 	    	test:/\.(jpg|png|gif|svg)$/i,
 	    	loader:'url-loader',
-	    	query:{
+	    	options:{
 	    		limit:200000,
-	    		name:'assets/[name].[ext]'
+	    		esModule:false,
+	    		name:'assets/[name].[ext]',
+	    		outputPath:'/img'
 	    	}
+	    },
+	    {
+	    	test:/\.vue$/,
+	        loader: 'vue-loader',
+	    	exclude: require("path").resolve(__dirname,"node_modules")
+
 	    }
 	  ]
 	},
 	plugins: [
+	  // new CleanWebpackPlugin(),
+	  new vueLoaderPlugin(),
 	  new htmlWebpackPlugin({
 	  	filename:'app.html',
 	  	template:'index.html',
@@ -138,5 +149,13 @@ module.exports={
 	  	inject:'body',
 	  	chunks:['c']
 	  })
-	]
+	],
+	devServer:{
+		contentBase:__dirname+"/dist",
+		host:'localhost',
+		port:8080,
+		hot:true,//热更新
+		open:true,//运行完打开
+		openPage:'index.html'
+	}
 }
